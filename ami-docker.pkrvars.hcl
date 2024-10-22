@@ -1,5 +1,0 @@
-docker_image = "ubuntu:lunar"
-msg="for ubuntu var file"
-focal_msg="for the ubuntu-focal var file"
-docker_username = "muzakkirsaifi"
-docker_password = "Admin@123"
