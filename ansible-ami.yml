@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Enable and start NGINX
+      service:
+        name: nginx
+        enabled: yes
+        state: started
+
+    - name: Copy AMI HTML file to NGINX
+      copy:
+        src: /tmp/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'

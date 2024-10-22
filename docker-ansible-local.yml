@@ -1,0 +1,44 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Pull the Ubuntu Docker image
+      docker_image:
+        name: ubuntu
+        tag: latest
+        source: pull
+        state: present
+
+    - name: Run an Ubuntu container
+      docker_container:
+        name: ubuntu_container
+        image: ubuntu:latest
+        state: started
+        detach: true
+        command: ["sleep", "infinity"]  # Keep the container running indefinitely
+
+    - name: Wait for the container to be ready
+      wait_for:
+        timeout: 10
+        # port: 80  # This waits for the mapped port; adjust if needed
+
+    - name: Check container status
+      command: docker ps -a
+      register: container_status
+
+    - name: Output container status
+      debug:
+        var: container_status.stdout
+
+    - name: Get OS release from the running container
+      command: docker exec ubuntu_container cat /etc/os-release
+      register: os_release_output
+      when: "'ubuntu_container' in container_status.stdout"
+
+    - name: Output OS release
+      debug:
+        var: os_release_output.stdout
+
+    # - name: Stop the Ubuntu container
+    #   docker_container:
+    #     name: ubuntu_container
+    #     state: absent

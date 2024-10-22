@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Check container status
+      command: docker ps -a
+      register: container_status
+
+    - name: Output container status
+      debug:
+        var: container_status.stdout
+
+    - name: Get OS release from the running container
+      command: docker exec ubuntu_container cat /etc/os-release
+      register: os_release_output
+      when: "'ubuntu_container' in container_status.stdout"
+
+    - name: Output OS release
+      debug:
+        var: os_release_output.stdout
+
+    # You can add more tasks here to run on the running container
