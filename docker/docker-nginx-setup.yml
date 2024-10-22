@@ -1,0 +1,69 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Ensure Python is installed
+      apt:
+        name: python3
+        state: present
+        update_cache: yes
+
+    - name: Install apt-utils and update apt cache
+      apt:
+        name: apt-utils
+        state: present
+        update_cache: yes
+
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+
+    - name: Check NGINX version
+      command: nginx -v
+      register: nginx_version
+
+    - name: Print NGINX version
+      debug:
+        msg: "NGINX version is {{ nginx_version.stderr }}"
+
+    - name: Check if the HTML file exists
+      command: ls -l /tmp/docker_index.html
+      register: check_file
+
+    - debug:
+        var: check_file.stdout
+
+
+    - name: Copy Docker HTML file to NGINX
+      copy:
+        src: /tmp/docker_index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+        remote_src: yes  # Indicates the source file is on the remote host
+        
+    - name: Install CURL
+      apt:
+        name: curl
+        state: present
+
+    - name: Start and enable NGINX service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Check NGINX status
+      command: service nginx status
+      register: nginx_status
+      ignore_errors: yes  # Ignore errors if NGINX is not running or command fails
+
+    - name: Print NGINX status
+      debug:
+        msg: "NGINX status output: {{ nginx_status.stdout if nginx_status.rc == 0 else 'NGINX is not running or command failed.' }}"
+
+                
+        
+
